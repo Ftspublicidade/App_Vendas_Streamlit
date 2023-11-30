@@ -1,0 +1,6 @@
+streamlit
+pandas 
+plotly_express
+openpyxl
+numpy
+streamlit-extras
