@@ -3,37 +3,59 @@ import streamlit as st
 import plotly.express as px
 from streamlit_extras.metric_cards import style_metric_cards 
 
-# carregar as bases de dados
-df_vendas = pd.read_excel("Vendas.xlsx")
-df_produtos = pd.read_excel("Produtos.xlsx")
+@st.cache_data
+def carregar_dados():
+    # carregar as bases de dados
+    df_vendas = pd.read_excel("Vendas.xlsx")
+    df_produtos = pd.read_excel("Produtos.xlsx")
 
-df = pd.merge(df_vendas, df_produtos, how='left', on='ID Produto')
+    df = pd.merge(df_vendas, df_produtos, how='left', on='ID Produto')
 
-# Criando colunas
-df["Custo"] = df["Custo Unitário"] * df["Quantidade"]
-df["Lucro"] = df["Valor Venda"] - df["Custo"]
-df["mes_ano"] = df["Data Venda"].dt.to_period("M").astype(str)
+    # Criando colunas
+    df["Custo"] = df["Custo Unitário"] * df["Quantidade"]
+    df["Lucro"] = df["Valor Venda"] - df["Custo"]
+    df["mes_ano"] = df["Data Venda"].dt.to_period("M").astype(str)
+    df["Ano"] = df["Data Venda"].dt.year
 
-#Agrupamentos
-produtos_vendidos_marca = df.groupby("Marca")["Quantidade"].sum().sort_values(ascending=True).reset_index()
-lucro_categoria = df.groupby("Categoria")["Lucro"].sum().reset_index()
-lucro_mes_categoria = df.groupby(["mes_ano", "Categoria"])["Lucro"].sum().reset_index()
+    return df
+
 
 def main():
+
+    df = carregar_dados()
+
+    
+
+
 
     #st.sidebar.image("f3.png", width=150)
     st.title("Dasboard de Vendas 📊")
 
-    total_custo = (df["Custo"].sum()).astype(str)
+    # Adicione um filtro de ano na barra lateral
+    ano_filtrado = st.sidebar.selectbox("Filtrar por Ano:", [None, *df['Ano'].unique()])
+
+    # Se o usuário escolheu um ano, filtre o DataFrame
+    if ano_filtrado is not None:
+        df_filtrado = df[df['Ano'] == ano_filtrado]
+    else:
+        df_filtrado = df.copy()  # Crie uma cópia do DataFrame original
+
+
+    total_custo = (df_filtrado["Custo"].sum()).astype(str)
     total_custo = total_custo.replace(".",",")
     total_custo = "R$" + total_custo[:2] + "." + total_custo[2:5] + "." + total_custo[5:]
 
     
-    total_lucro = (df["Lucro"].sum()).astype(str)
+    total_lucro = (df_filtrado["Lucro"].sum()).astype(str)
     total_lucro = total_lucro.replace(".",",")
     total_lucro = "R$" + total_lucro[:2] +"." + total_lucro[2:5] + "." + total_lucro[5:]
 
-    total_clientes = df["ID Cliente"].nunique()
+    total_clientes = df_filtrado["ID Cliente"].nunique()
+
+    #Agrupamentos
+    produtos_vendidos_marca = df_filtrado.groupby("Marca")["Quantidade"].sum().sort_values(ascending=True).reset_index()
+    lucro_categoria = df_filtrado.groupby("Categoria")["Lucro"].sum().reset_index()
+    lucro_mes_categoria = df_filtrado.groupby(["mes_ano", "Categoria"])["Lucro"].sum().reset_index()
 
     col1, col2, col3 = st.columns(3)
 
