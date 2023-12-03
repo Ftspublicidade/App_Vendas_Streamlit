@@ -116,7 +116,7 @@ def main():
 
     fig1 = px.pie(lucro_categoria, values="Lucro", names="Categoria",
                   title="Lucro por Categoria", width=400, height=350,
-                  color_discrete_sequence=["#3e4095", "#EC610C"])
+                  color_discrete_sequence=["#3e4095", "#EC610C"],hole=0.6)
     fig1.update_layout(title_x=0.5)
     col2.plotly_chart(fig1)
 
