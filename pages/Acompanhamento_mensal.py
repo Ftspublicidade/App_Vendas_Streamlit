@@ -4,17 +4,8 @@ import numpy as np
 
 @st.cache_data
 def carregar_dados():
-    # carregar as bases de dados
-    df_vendas = pd.read_excel("Vendas.xlsx")
-    df_produtos = pd.read_excel("Produtos.xlsx")
-
-    df = pd.merge(df_vendas, df_produtos, how='left', on='ID Produto')
-
-    # Criando colunas
-    df["Custo"] = df["Custo Unitário"] * df["Quantidade"]
-    df["Lucro"] = df["Valor Venda"] - df["Custo"]
-    df["mes_ano"] = df["Data Venda"].dt.to_period("M").astype(str)
-    df["Ano"] = df["Data Venda"].dt.year
+    
+    df = pd.read_excel("Vendas.xlsx")
 
     return df
 
@@ -25,6 +16,8 @@ def color_negative(valor):
     return f'color: {color}'
 
 def main():
+
+    st.set_page_config(layout ="wide")
 
     df = carregar_dados()
 
