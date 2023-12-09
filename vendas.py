@@ -13,10 +13,10 @@ def carregar_dados():
 
 def main():
 
+    st.set_page_config(layout ="wide")
+
+
     df = carregar_dados()
-
-    
-
 
 
     #st.sidebar.image("f3.png", width=150)
