@@ -5,17 +5,8 @@ from streamlit_extras.metric_cards import style_metric_cards
 
 @st.cache_data
 def carregar_dados():
-    # carregar as bases de dados
-    df_vendas = pd.read_excel("Vendas.xlsx")
-    df_produtos = pd.read_excel("Produtos.xlsx")
-
-    df = pd.merge(df_vendas, df_produtos, how='left', on='ID Produto')
-
-    # Criando colunas
-    df["Custo"] = df["Custo Unitário"] * df["Quantidade"]
-    df["Lucro"] = df["Valor Venda"] - df["Custo"]
-    df["mes_ano"] = df["Data Venda"].dt.to_period("M").astype(str)
-    df["Ano"] = df["Data Venda"].dt.year
+    
+    df = pd.read_excel("Vendas.xlsx")
 
     return df
 
@@ -31,14 +22,15 @@ def main():
     #st.sidebar.image("f3.png", width=150)
     st.title("Dasboard de Vendas 📊")
 
-    # Adicione um filtro de ano na barra lateral
-    ano_filtrado = st.sidebar.selectbox("Filtrar por Ano:", [None, *df['Ano'].unique()])
+    
+    ano_filtrado = st.sidebar.selectbox("Filtrar por Ano:", ["Todos", *df['Ano'].unique()])
 
-    # Se o usuário escolheu um ano, filtre o DataFrame
-    if ano_filtrado is not None:
+
+    # Aplicar filtro apenas se não for "Todos"
+    if ano_filtrado  != "Todos":
         df_filtrado = df[df['Ano'] == ano_filtrado]
     else:
-        df_filtrado = df.copy()  # Crie uma cópia do DataFrame original
+        df_filtrado = df  # Sem filtro se "Todos" for selecionado
 
 
     total_custo = (df_filtrado["Custo"].sum()).astype(str)
@@ -116,7 +108,7 @@ def main():
 
     fig1 = px.pie(lucro_categoria, values="Lucro", names="Categoria",
                   title="Lucro por Categoria", width=400, height=350,
-                  color_discrete_sequence=["#3e4095", "#EC610C"],hole=0.6)
+                  color_discrete_sequence=["#3e4095", "#EC610C"], hole=0.6)
     fig1.update_layout(title_x=0.5)
     col2.plotly_chart(fig1)
 
